@@ -118,6 +118,7 @@ def gsa_authenticate(username, password):
         for k, v in spd.items():
             if isinstance(v, bytes):
                 spd[k] = base64.b64encode(v).decode()
+                logger.info(f'item {k} is: {spd[k]}')
         sms_second_factor(spd["adsid"], spd["GsIdmsToken"])
 
         return gsa_authenticate(username, password)
@@ -147,10 +148,10 @@ def gsa_authenticated_request(parameters):
         headers=headers,
         data=plist.dumps(body),
         verify=False,
-        timeout=5,
+        timeout=15,
     )
     response = f"HTTP-Code: {resp.status_code}\n{resp.text}"
-    logger.debug(response)
+    logger.info(f'gsservice2 response: {response}')
 
     return plist.loads(resp.content)["Response"]
 
@@ -170,7 +171,7 @@ def generate_cpd():
 
 
 def generate_anisette_headers():
-    h = json.loads(requests.get(config.getAnisetteServer(), timeout=5).text)
+    h = json.loads(requests.get(config.getAnisetteServer(), timeout=15).text)
     a = {"X-Apple-I-MD": h["X-Apple-I-MD"],
          "X-Apple-I-MD-M": h["X-Apple-I-MD-M"]}
     a.update(generate_meta_headers(user_id=USER_ID, device_id=DEVICE_ID))
@@ -221,6 +222,8 @@ def sms_second_factor(dsid, idms_token):
     identity_token = base64.b64encode(
         (dsid + ":" + idms_token).encode()).decode()
 
+    logger.info(f'sms second factor dsid {dsid}, idms token: {idms_token}, identity_token: {identity_token}')
+
     # TODO: Actually do this request to get user prompt data
     # a = requests.get("https://gsa.apple.com/auth", verify=False)
     # This request isn't strictly necessary though,
@@ -236,9 +239,10 @@ def sms_second_factor(dsid, idms_token):
     }
 
     headers.update(generate_anisette_headers())
+    logger.info(f'updated headers: {headers}')
 
     # TODO: Actually get the correct id, probably in the above GET
-    body = {"phoneNumber": {"id": 1}, "mode": "sms"}
+    body = {"phoneNumber": {"id": 2}, "mode": "sms"}
 
     # This will send the 2FA code to the user's phone over SMS
     # We don't care about the response, it's just some HTML with a form for entering the code
@@ -248,8 +252,9 @@ def sms_second_factor(dsid, idms_token):
         json=body,
         headers=headers,
         verify=False,
-        timeout=5
+        timeout=15
     )
+    logger.info(f'verify phone response: {t.text}')
     # Prompt for the 2FA code. It's just a string like '123456', no dashes or spaces
     code = input("Enter SMS 2FA code: ")
 
@@ -261,7 +266,7 @@ def sms_second_factor(dsid, idms_token):
         json=body,
         headers=headers,
         verify=False,
-        timeout=5,
+        timeout=15,
     )
     response = f"HTTP-Code: {resp.status_code} with {len(resp.text)} bytes"
     logger.debug(response)
