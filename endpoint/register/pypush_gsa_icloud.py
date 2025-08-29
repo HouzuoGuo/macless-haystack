@@ -40,6 +40,8 @@ def icloud_login_mobileme(username='', password=''):
     g = gsa_authenticate(username, password)
     pet = g["t"]["com.apple.gs.idms.pet"]["token"]
     adsid = g["adsid"]
+    logger.info(f'pet: {pet}')
+    logger.info(f'adsid: {adsid}')
 
     data = {
         "apple-id": username,
@@ -64,7 +66,7 @@ def icloud_login_mobileme(username='', password=''):
         verify=False,
     )
     response = f"HTTP-Code: {resp.status_code}\n{resp.text}"
-    logger.debug(response)
+    logger.info(response)
     return plist.loads(resp.content)
 
 
@@ -242,7 +244,8 @@ def sms_second_factor(dsid, idms_token):
     logger.info(f'updated headers: {headers}')
 
     # TODO: Actually get the correct id, probably in the above GET
-    body = {"phoneNumber": {"id": 2}, "mode": "sms"}
+    numID = input('Phone number 2FA method ID: ')
+    body = {"phoneNumber": {"id": numID}, "mode": "sms"}
 
     # This will send the 2FA code to the user's phone over SMS
     # We don't care about the response, it's just some HTML with a form for entering the code
@@ -269,11 +272,11 @@ def sms_second_factor(dsid, idms_token):
         timeout=15,
     )
     response = f"HTTP-Code: {resp.status_code} with {len(resp.text)} bytes"
-    logger.debug(response)
+    logger.info(response)
     header_string = "Headers:\n"
     for header, value in resp.headers.items():
         header_string += f"{header}: {value}\n"
-    logger.debug(header_string)
+    logger.info(header_string)
     # Headers does not include Apple DSID, 2FA failed
     if resp.ok and "X-Apple-DSID" in resp.headers:
         logger.info("2FA successful")

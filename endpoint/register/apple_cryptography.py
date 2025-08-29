@@ -50,8 +50,7 @@ def getAuth(regenerate=False):
         mobileme = icloud_login_mobileme(
             username=config.getUser(), password=config.getPass())
 
-        logger.debug('Answer from icloud login')
-        logger.debug(mobileme)
+        logger.info(f'Answer from icloud login: {mobileme}')
         status = mobileme['delegates']['com.apple.mobileme']['status']
         if status == 0:
             j = {'dsid': mobileme['dsid'], 'searchPartyToken': mobileme['delegates']

@@ -77,13 +77,13 @@ class ServerHandler(BaseHTTPRequestHandler):
 
         post_body = self.rfile.read(content_len)
 
-        logger.debug('Getting with post: ' + str(post_body))
+        logger.info('Getting with post: ' + str(post_body))
         body = json.loads(post_body)
         if "days" in body:
             days = body['days']
         else:
             days = 7
-        logger.debug('Querying for ' + str(days) + ' days')
+        logger.info('Querying for ' + str(days) + ' days')
         unixEpoch = int(datetime.now().strftime('%s'))
         startdate = unixEpoch - (60 * 60 * 24 * days)
 
@@ -97,8 +97,8 @@ class ServerHandler(BaseHTTPRequestHandler):
             r = requests.post("https://gateway.icloud.com/acsnservice/fetch",  auth=getAuth(regenerate=False, second_factor='sms'),
                               headers=pypush_gsa_icloud.generate_anisette_headers(),
                               json=data)
-            logger.debug('Return from fetch service:')
-            logger.debug(r.content.decode())
+            logger.info('Return from fetch service:')
+            logger.info(r.content.decode())
             result = json.loads(r.content.decode())
             results = result['results']
 
@@ -142,7 +142,7 @@ def getAuth(regenerate=False, second_factor='sms'):
     else:
         mobileme = pypush_gsa_icloud.icloud_login_mobileme(username=config.USER, password=config.PASS,
                                                            second_factor=second_factor)
-        logger.debug('Mobileme result: ' + mobileme)
+        logger.info('Mobileme result: ' + mobileme)
         j = {'dsid': mobileme['dsid'], 'searchPartyToken': mobileme['delegates']
              ['com.apple.mobileme']['service-data']['tokens']['searchPartyToken']}
         with open(config.getConfigFile(), "w") as f:
