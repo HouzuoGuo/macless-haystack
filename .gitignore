@@ -134,4 +134,4 @@ endpoint/venv/*
 Pipfile
 endpoint/Pipfile
 endpoint/Pipfile.lock
-endpoint/data
+endpoint/data/auth.json

@@ -38,9 +38,9 @@ logger = logging.getLogger()
 def icloud_login_mobileme(username="", password=""):
     print("")  # Sometimes no output
     if not username:
-        username = input("Apple ID: ")
+        username = input("Apple ID:")
     if not password:
-        password = getpass("Password: ")
+        password = input("Password:")
 
     g = gsa_authenticate(username, password)
     pet = g["t"]["com.apple.gs.idms.pet"]["token"]
