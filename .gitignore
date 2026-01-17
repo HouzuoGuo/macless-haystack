@@ -131,3 +131,7 @@ endpoint/data/*.json
 endpoint/venv/*
 *.iml
 .idea
+Pipfile
+endpoint/Pipfile
+endpoint/Pipfile.lock
+endpoint/data
